@@ -1,0 +1,53 @@
+#ifndef WeaponRelationDefs
+	#define WeaponRelationDefs
+	//repoint to new weapon table
+	#ifdef _FE6_
+	PUSH
+	ORG $25A9C
+	POIN WeaponRelationships
+	// orginal at $5C61C0
+	POP
+	#endif
+
+	#ifdef _FE7_
+	PUSH
+	ORG $2A17C 
+	POIN WeaponRelationships 
+	// original at $B9426C
+	POP
+	#endif
+
+	#ifdef _FE8_
+	PUSH
+	ORG $2C7CC
+	POIN WeaponRelationships 
+	// original at $59BA90
+	POP
+	#endif
+	
+	#define WeaponRelation(awtype,dwtype,hit,damage) "BYTE awtype dwtype (hit) (damage)"
+	#define WeaponRelationEnd "BYTE 0xFF 0x0 0x0 0x0"
+	
+	//define weapon types
+	#ifndef WeaponTypes
+		
+		#define WeaponTypes
+		
+		//Define Weapon Types here
+		//These are already defined in EAstlib
+		#define Sword 0x0
+		#define Lance 0x1
+		#define Axe 0x2
+		#define Bow 0x3
+		#define Staff 0x4
+		#define Anima 0x5
+		#define Light 0x6
+		#define Dark 0x7
+		
+		//used by monsters in FE8 and probably also the final bosses
+		#define Monster 0xB
+		//add new weapon types here
+		
+	#endif
+
+#endif
