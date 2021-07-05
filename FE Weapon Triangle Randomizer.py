@@ -1,4 +1,4 @@
-import os, random
+import random
 from itertools import product
 from pathlib import Path
 import tkinter as tk
