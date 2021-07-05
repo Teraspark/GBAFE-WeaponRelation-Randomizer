@@ -1,3 +1,18 @@
+#ifndef FreeSpace
+	#ifdef _FE6_
+	#define FreeSpace 0xE08000
+	ORG FreeSpace
+	#endif
+	#ifdef _FE7_
+	#define FreeSpace 0xD20000
+	ORG FreeSpace
+	#endif
+	#ifdef _FE8_
+	#define FreeSpace 0xb2a610
+	ORG FreeSpace
+	#endif
+#endif
+
 #ifndef WeaponRelationDefs
 	#define WeaponRelationDefs
 	//repoint to new weapon table
