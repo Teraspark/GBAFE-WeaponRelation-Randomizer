@@ -195,9 +195,10 @@ class Window:
 		if (self.outfile.get()):
 			output = '//Weapon Relations Randomizer\n'
 			output += '//Seed: ' + self.seed.get() + '\n'
-			output += '#include "WeaponRelationDefs.event"\n'
+			output += '#include "WeaponRelationDefs.event"\n\n'
 			output += 'WeaponRelationships:\n'
 			output += '\n'.join(w.output() for w in relations) + '\n'
+			output += 'WeaponRelationEnd\n'
 			Path(self.outfile.get()).write_text(output)
 	
 class Relation:
