@@ -181,11 +181,11 @@ class Window:
 		m = self.randomode.get()
 		if m in range(len(self.modes)):
 			wrlist = self.modes[m][1](list(weapons),rhit,rpow)
-			print('WeaponRelations:')
-			for wr in wrlist:
-				print(wr.output())
-			print('WeaponRelationEnd')
-		self.writefile(wrlist)
+			# print('WeaponRelations:')
+			# for wr in wrlist:
+				# print(wr.output())
+			# print('WeaponRelationEnd')
+			self.writefile(wrlist)
 		
 	def writefile(self,relations):
 		if not (self.outfile.get()):
