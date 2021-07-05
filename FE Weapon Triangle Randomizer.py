@@ -186,6 +186,8 @@ class Window:
 				# print(wr.output())
 			# print('WeaponRelationEnd')
 			self.writefile(wrlist)
+			
+			prompt = messagebox.showinfo(title='Randomizing Complete!',message='Randomzing Complete!')
 		
 	def writefile(self,relations):
 		if not (self.outfile.get()):
