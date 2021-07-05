@@ -221,9 +221,12 @@ class Relation:
 		self.hit = hit
 		return
 	def output(self):
-		return ('WeaponRelation('+self.wt1+','
-		+self.wt2+','+str(self.hit)+','
-		+str(self.damage) + ')')
+		if self.damage or self.hit:
+			return ('WeaponRelation('+self.wt1+','
+			+self.wt2+','+str(self.hit)+','
+			+str(self.damage) + ')')
+		else:
+			return ('//'+self.wt1+' vs '+self.wt2+' is a neutral matchup')
 
 def randoStart():
 	'''prepare for randomization without gui'''
@@ -278,11 +281,11 @@ def chaosRando(weapons,rhit,rpow):
 		#an advantage or disadvantage
 		# or neutral
 		neg = random.choice([1,0,-1])
-		if neg: #skip if 0
-			hit = random.choice(rhit) * neg
-			pow = random.choice(rpow) * neg
-			wr.setRelation(hit,pow)
-			wtalist.append(wr)
+		# if neg: #skip if 0
+		hit = random.choice(rhit) * neg
+		pow = random.choice(rpow) * neg
+		wr.setRelation(hit,pow)
+		wtalist.append(wr)
 	return wtalist
 
 if __name__ == '__main__':
