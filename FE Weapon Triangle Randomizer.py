@@ -43,10 +43,10 @@ class Window:
 		self.master = tk.Tk()
 		self.master.title(title)
 		self.master.geometry('500x420')
-		self.buildUI2()
+		self.buildUI()
 		self.master.mainloop()
 		
-	def buildUI2(self):
+	def buildUI(self):
 		self.mainframe = tk.Frame(self.master)
 		self.mainname = tk.Label(self.master,text='Weapon Relation Randomizer')
 		self.mainname.pack(side=tk.TOP)
@@ -137,84 +137,6 @@ class Window:
 		self.run.grid(row=7,column=0,columnspan=5,pady=5,sticky=tk.E+tk.W)
 		
 		self.mainframe.pack()
-		
-	def buildUI(self):
-		self.mainframe = tk.Frame(self.master)
-		self.mainframe.pack(pady=10)
-		
-		self.wbox = tk.Frame(self.mainframe)
-		self.wbox.pack(side=tk.LEFT,expand=True,pady=5)
-		#List of weapon types
-		self.wpoolname = tk.Label(self.wbox, text="Weapons Pool")
-		self.wpoolname.pack()
-		self.wpool = tk.Listbox(self.wbox)
-		self.wpool.pack(expand=True)
-		#add default weapon types to pool
-		for w in WeaponList: self.wpool.insert(tk.END,w)
-		
-		self.remove = tk.Button(self.wbox,text="Remove",command=self.wremove)
-		self.remove.pack()
-		self.input = tk.Entry(self.wbox)
-		self.input.pack(side=tk.LEFT,padx=10)
-		self.add = tk.Button(self.wbox,text="Add",command=self.winsert)
-		self.add.pack(side=tk.RIGHT)
-		
-		self.statbox = tk.Frame(self.mainframe)
-		self.statbox.pack(side=tk.RIGHT)
-		self.hitbox = tk.Frame(self.statbox)
-		self.hitbox.pack(side=tk.LEFT)
-		self.hitname = tk.Label(self.hitbox,text="Accuracy")
-		self.hitname.pack()
-		self.minhit = tk.IntVar()
-		self.maxhit = tk.IntVar()
-		self.minhitname = tk.Label(self.hitbox,text='Min:')
-		self.minhitname.pack()
-		self.minhitdata = tk.Spinbox(self.hitbox,from_=0,to=100,increment=5,textvariable=self.minhit)
-		self.minhitdata.pack()
-		self.maxhitname = tk.Label(self.hitbox,text='Max:')
-		self.maxhitname.pack()
-		self.maxhitdata = tk.Spinbox(self.hitbox,from_=5,to=100,increment=5,textvariable=self.maxhit)
-		self.maxhitdata.pack()
-		self.powbox = tk.Frame(self.statbox)
-		self.powbox.pack(side=tk.RIGHT)
-		self.powname = tk.Label(self.powbox,text="Damage")
-		self.powname.pack()
-		self.minpow = tk.IntVar()
-		self.maxpow = tk.IntVar()
-		self.minpowname = tk.Label(self.powbox,text='Min:')
-		self.minpowname.pack()
-		self.minpowdata = tk.Spinbox(self.powbox,from_=0,to=15,textvariable=self.minpow)
-		self.minpowdata.pack()
-		self.maxpowname = tk.Label(self.powbox,text='Max:')
-		self.maxpowname.pack()
-		self.maxpowdata = tk.Spinbox(self.powbox,from_=0,to=15,textvariable=self.maxpow)
-		self.maxpowdata.pack()
-		#set default values
-		self.minhit.set(15)
-		self.maxhit.set(15)
-		self.minpow.set(1)
-		self.maxpow.set(1)
-		
-		#start randomization button
-		self.run = tk.Button(self.master,text='Randomize',command=self.randomize)
-		self.run.pack(side=tk.BOTTOM,pady=5)
-		
-		#randomiztion options
-		self.randobox = tk.Frame(self.master)
-		self.randobox.pack(side=tk.BOTTOM)
-		self.randotitle = tk.Label(self.randobox,text='Randomization Mode')
-		self.randotitle.pack()
-		
-		self.randomode = tk.IntVar()
-		self.randoptions= []
-		
-		r = tk.Radiobutton(self.randobox,text="Triangle",variable = self.randomode,value = 0)
-		r.pack()
-		self.randoptions.append(r)
-		
-		r = tk.Radiobutton(self.randobox,text="Chaos",variable = self.randomode,value = 1)
-		r.pack()
-		self.randoptions.append(r)
 		
 	def wremove(self):
 		'''
