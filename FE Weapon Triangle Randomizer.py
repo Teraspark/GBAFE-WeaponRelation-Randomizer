@@ -185,11 +185,11 @@ class Window:
 			# for wr in wrlist:
 				# print(wr.output())
 			# print('WeaponRelationEnd')
-			self.writefile(wrlist)
+			self.writefile(wrlist,weapons)
 			
 			prompt = messagebox.showinfo(title='Randomizing Complete!',message='Randomzing Complete!')
 		
-	def writefile(self,relations):
+	def writefile(self,relations,weapons):
 		if not (self.outfile.get()):
 			self.loadfile()
 		if (self.outfile.get()):
@@ -197,8 +197,13 @@ class Window:
 			output += '//Seed: ' + self.seed.get() + '\n'
 			output += '#include "WeaponRelationDefs.event"\n\n'
 			output += 'WeaponRelationships:\n'
-			output += '\n'.join(w.output() for w in relations) + '\n'
+			for w in weapons:
+				output += '//' +w + ' Relations\n'
+				for r in relations:
+					if r.isAttacker(w): output+= r.output()+'\n'
+				output+='\n'
 			output += 'WeaponRelationEnd\n'
+			output += '\n// **Any Relation that is not shown here is neutral**\n'
 			Path(self.outfile.get()).write_text(output)
 	
 class Relation:
@@ -221,6 +226,9 @@ class Relation:
 		self.damage = damage
 		self.hit = hit
 		return
+	def isAttacker(self,type):
+		'''check if first weapon type matches given value'''
+		return self.wt1 == type
 	def output(self):
 		if self.damage or self.hit:
 			return ('WeaponRelation('+self.wt1+','
@@ -247,7 +255,7 @@ def randoStart():
 
 def triRando(weapons,rhit,rpow):
 	'''randomize to make weapon triangles
-	return list of weapon relatiions'''
+	return list of weapon relations'''
 	wtalist = []
 	
 	while(len(weapons) >= 3):
@@ -274,7 +282,7 @@ def triRando(weapons,rhit,rpow):
 
 def chaosRando(weapons,rhit,rpow):
 	'''weapon relations are completely random
-	return list of weapon relatiions'''
+	return list of weapon relations'''
 	wtalist=[]
 	for (z,x) in product(weapons,weapons):
 		wr = Relation(z,x)
