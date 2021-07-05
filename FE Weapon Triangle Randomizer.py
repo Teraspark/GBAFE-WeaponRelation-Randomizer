@@ -10,7 +10,7 @@ from string import digits as Numberlist
 
 GUI = True
 #defualt List of weapon types
-WeaponList = ['Sword','Lance','Axe','Bow','Light','Anima','Dark']
+WeaponList = ('Sword','Lance','Axe','Bow','Light','Anima','Dark','Monster')
 
 #File loading/saving functions
 def askForFileIn(filedata=()):
