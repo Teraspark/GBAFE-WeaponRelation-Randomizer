@@ -1,4 +1,4 @@
-import random
+import random, glob
 from itertools import product
 from pathlib import Path
 import tkinter as tk
@@ -9,6 +9,8 @@ from string import ascii_letters as Letterlist
 from string import digits as Numberlist
 
 GUI = True
+defFile = "WeaponRelationDefs.event"
+
 #defualt List of weapon types
 WeaponList = ('Sword','Lance','Axe','Bow','Light','Anima','Dark','Monster')
 
@@ -195,7 +197,7 @@ class Window:
 		if (self.outfile.get()):
 			output = '//Weapon Relations Randomizer\n'
 			output += '//Seed: ' + self.seed.get() + '\n'
-			output += '#include "WeaponRelationDefs.event"\n\n'
+			output += '#include "'+defFile+'"\n\n'
 			output += 'WeaponRelationships:\n'
 			for w in weapons:
 				output += '//' +w + ' Relations\n'
@@ -205,6 +207,7 @@ class Window:
 			output += 'WeaponRelationEnd\n'
 			output += '\n// **Any Relation that is not shown here is neutral**\n'
 			Path(self.outfile.get()).write_text(output)
+			genDefs(Path(self.outfile.get()))
 	
 class Relation:
 	'''
@@ -237,6 +240,84 @@ class Relation:
 		else:
 			return ('//'+self.wt1+' vs '+self.wt2+' is a neutral matchup')
 
+def genDefs(defpath):
+	'''
+	generate the definitions file if it 
+	does not exist in the given directory
+	'''
+	z= '''#ifndef FreeSpace
+	#ifdef _FE6_
+	#define FreeSpace 0xE08000
+	ORG FreeSpace
+	#endif
+	#ifdef _FE7_
+	#define FreeSpace 0xD20000
+	ORG FreeSpace
+	#endif
+	#ifdef _FE8_
+	#define FreeSpace 0xb2a610
+	ORG FreeSpace
+	#endif
+#endif
+
+#ifndef WeaponRelationDefs
+	#define WeaponRelationDefs
+	//repoint to new weapon table
+	#ifdef _FE6_
+	PUSH
+	ORG $25A9C
+	POIN WeaponRelationships
+	// orginal at $5C61C0
+	POP
+	#endif
+
+	#ifdef _FE7_
+	PUSH
+	ORG $2A17C 
+	POIN WeaponRelationships 
+	// original at $B9426C
+	POP
+	#endif
+
+	#ifdef _FE8_
+	PUSH
+	ORG $2C7CC
+	POIN WeaponRelationships 
+	// original at $59BA90
+	POP
+	#endif
+	
+	#define WeaponRelation(awtype,dwtype,hit,damage) "BYTE awtype dwtype (hit) (damage)"
+	#define WeaponRelationEnd "BYTE 0xFF 0x0 0x0 0x0"
+	
+	//define weapon types
+	#ifndef WeaponTypes
+		
+		#define WeaponTypes
+		
+		//Define Weapon Types here
+		//These are already defined in EAstlib
+		#define Sword 0x0
+		#define Lance 0x1
+		#define Axe 0x2
+		#define Bow 0x3
+		#define Staff 0x4
+		#define Anima 0x5
+		#define Light 0x6
+		#define Dark 0x7
+		
+		//used by monsters in FE8 and probably also the final bosses
+		#define Monster 0xB
+		//add new weapon types here
+		
+	#endif
+
+#endif
+	'''
+	x = defpath.with_name(defFile)
+	if not glob.glob(str(x),recursive=False):
+		x.write_text(z)
+		
 def randoStart():
 	'''prepare for randomization without gui'''
 	weapons = WeaponList
