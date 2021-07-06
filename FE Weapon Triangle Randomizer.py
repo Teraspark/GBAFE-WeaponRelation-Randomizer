@@ -103,6 +103,7 @@ class Window:
 		self.maxhit = tk.IntVar()
 		self.minatk = tk.IntVar()
 		self.maxatk = tk.IntVar()
+		self.singleroll = tk.IntVar()
 		self.statword = tk.Label(self.statbox,text='Weapon Advantage')
 		self.maxword = tk.Label(self.statbox,text='Max')
 		self.minword = tk.Label(self.statbox,text='Min')
@@ -121,6 +122,8 @@ class Window:
 		self.maxatkdata = tk.Spinbox(self.statbox,from_=0,to=15,textvariable=self.maxatk,width=10,command=self.adjustmax)
 		self.minatkdata.grid(row=3,column=1)
 		self.maxatkdata.grid(row=3,column=2)
+		self.rollcheck = tk.Checkbutton(self.statbox,text='Roll Once',variable=self.singleroll)
+		self.rollcheck.grid(row=4,columnspan=3)
 		
 		self.minhit.set(15)
 		self.maxhit.set(15)
@@ -187,15 +190,22 @@ class Window:
 		# modes = (triRando,chaosRando)
 		weapons = self.wpool.get(0,tk.END)
 		wrlist=[]
+		
 		(min,max) = (self.minatk.get(),self.maxatk.get())
 		ratk = range(min,max+1)
 		(min,max) = (self.minhit.get(),self.maxhit.get())
 		rhit = range(min,max+1,5)
 		
+		
 		#set randomizer seed
 		if not self.seed.get(): self.newseed()
 		random.seed(self.seed.get())
 		
+		if self.singleroll.get():
+			ratk = random.choices(ratk)
+			rhit = random.choices(rhit)
+			random.seed(self.seed.get())
+			
 		m = self.randomode.get()
 		if m in range(len(self.modes)):
 			wrlist = self.modes[m][1](list(weapons),rhit,ratk)
@@ -218,6 +228,7 @@ class Window:
 			output += 'Settings:\n'
 			output += '\tAccuracy\tMin: ' + str(self.minhit.get())+ '\tMax: ' + str(self.maxhit.get()) + '\n'
 			output += '\tDamage\t\tMin: ' + str(self.minatk.get()) + '\tMax: ' + str(self.maxatk.get())+'\n'
+			output += '\tSingleRoll: ' + str(bool(self.singleroll.get())) + '\n'
 			output += '*/\n\n'
 			
 			output += '#include "'+defFile+'"\n\n'
