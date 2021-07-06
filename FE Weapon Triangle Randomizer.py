@@ -101,31 +101,31 @@ class Window:
 		#set range for stat variation
 		self.minhit = tk.IntVar()
 		self.maxhit = tk.IntVar()
-		self.minpow = tk.IntVar()
-		self.maxpow = tk.IntVar()
+		self.minatk = tk.IntVar()
+		self.maxatk = tk.IntVar()
 		self.statword = tk.Label(self.statbox,text='Weapon Advantage')
 		self.maxword = tk.Label(self.statbox,text='Max')
 		self.minword = tk.Label(self.statbox,text='Min')
 		self.hitword = tk.Label(self.statbox,text='Accuracy')
-		self.powword = tk.Label(self.statbox,text='Damage')
+		self.atkword = tk.Label(self.statbox,text='Damage')
 		self.statword.grid(row=0,columnspan=3)
 		self.minword.grid(row=1,column=1)
 		self.maxword.grid(row=1,column=2)
 		self.hitword.grid(row=2,column=0)
-		self.powword.grid(row=3,column=0)
+		self.atkword.grid(row=3,column=0)
 		self.minhitdata = tk.Spinbox(self.statbox,from_=0,to=100,increment=5,textvariable=self.minhit,width=10,command=self.adjustmin)
 		self.maxhitdata = tk.Spinbox(self.statbox,from_=5,to=100,increment=5,textvariable=self.maxhit,width=10,command=self.adjustmax)
 		self.minhitdata.grid(row=2,column=1)
 		self.maxhitdata.grid(row=2,column=2)
-		self.minpowdata = tk.Spinbox(self.statbox,from_=0,to=15,textvariable=self.minpow,width=10,command=self.adjustmin)
-		self.maxpowdata = tk.Spinbox(self.statbox,from_=0,to=15,textvariable=self.maxpow,width=10,command=self.adjustmax)
-		self.minpowdata.grid(row=3,column=1)
-		self.maxpowdata.grid(row=3,column=2)
+		self.minatkdata = tk.Spinbox(self.statbox,from_=0,to=15,textvariable=self.minatk,width=10,command=self.adjustmin)
+		self.maxatkdata = tk.Spinbox(self.statbox,from_=0,to=15,textvariable=self.maxatk,width=10,command=self.adjustmax)
+		self.minatkdata.grid(row=3,column=1)
+		self.maxatkdata.grid(row=3,column=2)
 		
 		self.minhit.set(15)
 		self.maxhit.set(15)
-		self.minpow.set(1)
-		self.maxpow.set(1)
+		self.minatk.set(1)
+		self.maxatk.set(1)
 		
 		#randomizer mode selection
 		self.randomode = tk.IntVar()
@@ -147,14 +147,14 @@ class Window:
 		'''ensure the min values never rise above the max values'''
 		if self.minhit.get() > self.maxhit.get():
 			self.maxhit.set(self.minhit.get())
-		if self.minpow.get() > self.maxpow.get():
-			self.maxpow.set(self.minpow.get())
+		if self.minatk.get() > self.maxatk.get():
+			self.maxatk.set(self.minatk.get())
 	def adjustmax(self):
 		'''ensure the max values never fall below the min values'''
 		if self.maxhit.get() < self.minhit.get():
 			self.minhit.set(self.maxhit.get())
-		if self.maxpow.get() < self.minpow.get():
-			self.minpow.set(self.maxpow.get())
+		if self.maxatk.get() < self.minatk.get():
+			self.minatk.set(self.maxatk.get())
 		
 	def wremove(self):
 		'''
@@ -187,8 +187,8 @@ class Window:
 		# modes = (triRando,chaosRando)
 		weapons = self.wpool.get(0,tk.END)
 		wrlist=[]
-		(min,max) = (self.minpow.get(),self.maxpow.get())
-		rpow = range(min,max+1)
+		(min,max) = (self.minatk.get(),self.maxatk.get())
+		ratk = range(min,max+1)
 		(min,max) = (self.minhit.get(),self.maxhit.get())
 		rhit = range(min,max+1,5)
 		
@@ -198,7 +198,7 @@ class Window:
 		
 		m = self.randomode.get()
 		if m in range(len(self.modes)):
-			wrlist = self.modes[m][1](list(weapons),rhit,rpow)
+			wrlist = self.modes[m][1](list(weapons),rhit,ratk)
 			# print('WeaponRelations:')
 			# for wr in wrlist:
 				# print(wr.output())
@@ -217,7 +217,7 @@ class Window:
 			output += 'Mode: ' + self.modes[mode][0] + '\n'
 			output += 'Settings:\n'
 			output += '\tAccuracy\tMin: ' + str(self.minhit.get())+ '\tMax: ' + str(self.maxhit.get()) + '\n'
-			output += '\tDamage\t\tMin: ' + str(self.minpow.get()) + '\tMax: ' + str(self.maxpow.get())+'\n'
+			output += '\tDamage\t\tMin: ' + str(self.minatk.get()) + '\tMax: ' + str(self.maxatk.get())+'\n'
 			output += '*/\n\n'
 			
 			output += '#include "'+defFile+'"\n\n'
@@ -346,10 +346,10 @@ def randoStart():
 	weapons = WeaponList
 	#Get list of weapon types from ui
 	#otherwise use the default
-	rpow = range(1,5+1)	#range for damage bonus randomization
+	ratk = range(1,5+1)	#range for damage bonus randomization
 	rhit = range(10,25+1,5)	#range for accuracy bonus randomization
 	#call a rando function based on settings
-	wtalist = triRando(weapons,rhit,rpow)
+	wtalist = triRando(weapons,rhit,ratk)
 	#write output to file
 	print('WeaponRelations:')
 	for wr in wtalist:
@@ -357,7 +357,7 @@ def randoStart():
 	print('WeaponRelationEnd')
 	return
 
-def pairRando(weapons,rhit,rpow):
+def pairRando(weapons,rhit,ratk):
 	'''weapon relations are random pairings
 	if weapon 1 beats weapon 2 then 2 will lose to 1
 	'''
@@ -374,18 +374,18 @@ def pairRando(weapons,rhit,rpow):
 		# or neutral
 		neg = random.choice([1,0,-1])
 		hit = random.choice(rhit) * neg
-		pow = random.choice(rpow) * neg
+		atk = random.choice(ratk) * neg
 		wr = Relation(z,x)
-		wr.setRelation(hit,pow)
+		wr.setRelation(hit,atk)
 		wtalist.append(wr)
 		if z != x:
 			wr = Relation(x,z)
-			wr.setRelation(-hit,-pow)
+			wr.setRelation(-hit,-atk)
 			wtalist.append(wr)
 		pairings.append((z,x))
 	return wtalist
 
-def triRando(weapons,rhit,rpow):
+def triRando(weapons,rhit,ratk):
 	'''randomize to make weapon triangles
 	return list of weapon relations'''
 	wtalist = []
@@ -399,20 +399,20 @@ def triRando(weapons,rhit,rpow):
 			weapons.remove(w[x])
 		#roll for hit and/or damage bonuses if necessary
 		hit = random.choice(rhit)
-		pow = random.choice(rpow)
+		atk = random.choice(ratk)
 		#create weapon triangle
 		for (z,x) in ((w[0],w[1]),(w[1],w[2]),(w[2],w[0])):
 			#z has advantage over x
 			wr = Relation(z,x)
-			wr.setRelation(hit,pow)
+			wr.setRelation(hit,atk)
 			wtalist.append(wr)
 			#x has disadvantage to z
 			wr = Relation(x,z)
-			wr.setRelation(-hit,-pow)
+			wr.setRelation(-hit,-atk)
 			wtalist.append(wr)
 	return wtalist
 
-def circleRando(weapons,rhit,rpow):
+def circleRando(weapons,rhit,ratk):
 	'''randomize all weapon types into a circle
 	where each type beats one other type and loses to another'''
 	wtalist = []
@@ -424,18 +424,18 @@ def circleRando(weapons,rhit,rpow):
 		if (z,x) in pairings: continue
 		if (x,z) in weapons: continue
 		hit = random.choice(rhit)
-		pow = random.choice(rpow)
+		atk = random.choice(ratk)
 		wr = Relation(z,x)
-		wr.setRelation(hit,pow)
+		wr.setRelation(hit,atk)
 		wtalist.append(wr)
 		if z!= x:
 			wr = Relation(x,z)
-			wr.setRelation(-hit,-pow)
+			wr.setRelation(-hit,-atk)
 			wtalist.append(wr)
 		pairings.append((z,x))
 	return wtalist
 
-def chaosRando(weapons,rhit,rpow):
+def chaosRando(weapons,rhit,ratk):
 	'''weapon relations are completely random
 	return list of one sided weapon relations'''
 	wtalist=[]
@@ -447,8 +447,8 @@ def chaosRando(weapons,rhit,rpow):
 		neg = random.choice([1,0,-1])
 		# if neg: #skip if 0
 		hit = random.choice(rhit) * neg
-		pow = random.choice(rpow) * neg
-		wr.setRelation(hit,pow)
+		atk = random.choice(ratk) * neg
+		wr.setRelation(hit,atk)
 		wtalist.append(wr)
 	return wtalist
 
