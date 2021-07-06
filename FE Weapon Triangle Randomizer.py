@@ -210,9 +210,15 @@ class Window:
 		if not (self.outfile.get()):
 			self.loadfile()
 		if (self.outfile.get()):
-			output = '//Weapon Relations Randomizer\n'
-			output += '//Seed: ' + self.seed.get() + '\n'
-			output += '//Mode: ' + self.modes[mode][0] + '\n'
+			output = '/* '
+			output += 'Weapon Relations Randomizer\n\n'
+			output += 'Seed: ' + self.seed.get() + '\n'
+			output += 'Mode: ' + self.modes[mode][0] + '\n'
+			output += 'Settings:\n'
+			output += '\tAccuracy\tMin: ' + str(self.minhit.get())+ '\tMax: ' + str(self.maxhit.get()) + '\n'
+			output += '\tDamage\t\tMin: ' + str(self.minpow.get()) + '\tMax: ' + str(self.maxpow.get())+'\n'
+			output += '*/\n\n'
+			
 			output += '#include "'+defFile+'"\n\n'
 			output += 'WeaponRelationships:\n'
 			for w in weapons:
