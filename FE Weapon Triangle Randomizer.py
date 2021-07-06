@@ -40,8 +40,10 @@ class Window:
 	def __init__(self,title="Python GUI"):
 		self.modes = (
 		('Triangle',triRando),
+		('Pair',pairRando),
 		('Chaos',chaosRando)
 		)
+		
 		self.master = tk.Tk()
 		self.master.title(title)
 		self.master.geometry('500x420')
@@ -335,6 +337,34 @@ def randoStart():
 	print('WeaponRelationEnd')
 	return
 
+def pairRando(weapons,rhit,rpow):
+	'''weapon relations are random pairings
+	if weapon 1 beats weapon 2 then 2 will lose to 1
+	'''
+	wtalist = []
+	pairings = []
+	for (z,x) in product(weapons,weapons):
+		#skip if pairing already exists
+		if (x,z) in pairings:
+			continue
+		if (z,x) in pairings:
+			continue
+		#decide whether this is
+		#an advantage or disadvantage
+		# or neutral
+		neg = random.choice([1,0,-1])
+		hit = random.choice(rhit) * neg
+		pow = random.choice(rpow) * neg
+		wr = Relation(z,x)
+		wr.setRelation(hit,pow)
+		wtalist.append(wr)
+		if z != x:
+			wr = Relation(x,z)
+			wr.setRelation(-hit,-pow)
+			wtalist.append(wr)
+		pairings.append((z,x))
+	return wtalist
+
 def triRando(weapons,rhit,rpow):
 	'''randomize to make weapon triangles
 	return list of weapon relations'''
@@ -364,7 +394,7 @@ def triRando(weapons,rhit,rpow):
 
 def chaosRando(weapons,rhit,rpow):
 	'''weapon relations are completely random
-	return list of weapon relations'''
+	return list of one sided weapon relations'''
 	wtalist=[]
 	for (z,x) in product(weapons,weapons):
 		wr = Relation(z,x)
