@@ -112,12 +112,12 @@ class Window:
 		self.maxword.grid(row=1,column=2)
 		self.hitword.grid(row=2,column=0)
 		self.powword.grid(row=3,column=0)
-		self.minhitdata = tk.Spinbox(self.statbox,from_=0,to=100,increment=5,textvariable=self.minhit,width=10)
-		self.maxhitdata = tk.Spinbox(self.statbox,from_=5,to=100,increment=5,textvariable=self.maxhit,width=10)
+		self.minhitdata = tk.Spinbox(self.statbox,from_=0,to=100,increment=5,textvariable=self.minhit,width=10,command=self.adjustmin)
+		self.maxhitdata = tk.Spinbox(self.statbox,from_=5,to=100,increment=5,textvariable=self.maxhit,width=10,command=self.adjustmax)
 		self.minhitdata.grid(row=2,column=1)
 		self.maxhitdata.grid(row=2,column=2)
-		self.minpowdata = tk.Spinbox(self.statbox,from_=0,to=15,textvariable=self.minpow,width=10)
-		self.maxpowdata = tk.Spinbox(self.statbox,from_=0,to=15,textvariable=self.maxpow,width=10)
+		self.minpowdata = tk.Spinbox(self.statbox,from_=0,to=15,textvariable=self.minpow,width=10,command=self.adjustmin)
+		self.maxpowdata = tk.Spinbox(self.statbox,from_=0,to=15,textvariable=self.maxpow,width=10,command=self.adjustmax)
 		self.minpowdata.grid(row=3,column=1)
 		self.maxpowdata.grid(row=3,column=2)
 		
@@ -141,6 +141,19 @@ class Window:
 		self.run.grid(row=7,column=0,columnspan=5,pady=5,sticky=tk.E+tk.W)
 		
 		self.mainframe.pack()
+		
+	def adjustmin(self):
+		'''ensure the min values never rise above the max values'''
+		if self.minhit.get() > self.maxhit.get():
+			self.maxhit.set(self.minhit.get())
+		if self.minpow.get() > self.maxpow.get():
+			self.maxpow.set(self.minpow.get())
+	def adjustmax(self):
+		'''ensure the max values never fall below the min values'''
+		if self.maxhit.get() < self.minhit.get():
+			self.minhit.set(self.maxhit.get())
+		if self.maxpow.get() < self.minpow.get():
+			self.minpow.set(self.maxpow.get())
 		
 	def wremove(self):
 		'''
