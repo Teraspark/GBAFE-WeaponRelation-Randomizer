@@ -187,16 +187,17 @@ class Window:
 			# for wr in wrlist:
 				# print(wr.output())
 			# print('WeaponRelationEnd')
-			self.writefile(wrlist,weapons)
+			self.writefile(wrlist,weapons,m)
 			
 			prompt = messagebox.showinfo(title='Randomizing Complete!',message='Randomzing Complete!')
 		
-	def writefile(self,relations,weapons):
+	def writefile(self,relations,weapons,mode):
 		if not (self.outfile.get()):
 			self.loadfile()
 		if (self.outfile.get()):
 			output = '//Weapon Relations Randomizer\n'
 			output += '//Seed: ' + self.seed.get() + '\n'
+			output += '//Mode: ' + self.modes[mode][0] + '\n'
 			output += '#include "'+defFile+'"\n\n'
 			output += 'WeaponRelationships:\n'
 			for w in weapons:
