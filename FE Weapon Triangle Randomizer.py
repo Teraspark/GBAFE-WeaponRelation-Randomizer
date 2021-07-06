@@ -174,7 +174,7 @@ class Window:
 		(min,max) = (self.minpow.get(),self.maxpow.get())
 		rpow = range(min,max+1)
 		(min,max) = (self.minhit.get(),self.maxhit.get())
-		rhit = range(min,max+1)
+		rhit = range(min,max+1,5)
 		
 		#set randomizer seed
 		if not self.seed.get(): self.newseed()
