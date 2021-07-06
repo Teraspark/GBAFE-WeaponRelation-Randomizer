@@ -429,7 +429,7 @@ def circleRando(weapons,rhit,ratk):
 	wtalist = []
 	pairings = []
 	random.shuffle(weapons)
-	for v in range(len(weapons)):
+	for v,weapon in enumerate(weapons):
 		(z,x) = (weapons[v-1],weapons[v])
 		#prevent the same pairing from happening twice
 		if (z,x) in pairings: continue
