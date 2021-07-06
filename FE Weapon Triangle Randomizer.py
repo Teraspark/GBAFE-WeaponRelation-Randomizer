@@ -202,8 +202,8 @@ class Window:
 		random.seed(self.seed.get())
 		
 		if self.singleroll.get():
-			ratk = random.choices(ratk)
-			rhit = random.choices(rhit)
+			ratk = [random.choice(ratk)]
+			rhit = [random.choice(rhit)]
 			random.seed(self.seed.get())
 			
 		m = self.randomode.get()
@@ -215,7 +215,6 @@ class Window:
 			# print('WeaponRelationEnd')
 			self.writefile(wrlist,weapons,m)
 			
-			prompt = messagebox.showinfo(title='Randomizing Complete!',message='Randomzing Complete!')
 		
 	def writefile(self,relations,weapons,mode):
 		if not (self.outfile.get()):
@@ -242,6 +241,7 @@ class Window:
 			output += '\n// **Any Relation that is not shown here is neutral**\n'
 			Path(self.outfile.get()).write_text(output)
 			genDefs(Path(self.outfile.get()))
+			prompt = messagebox.showinfo(title='Randomizing Complete!',message='Randomzing Complete!')
 	
 class Relation:
 	'''
