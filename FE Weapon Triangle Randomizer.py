@@ -41,6 +41,7 @@ class Window:
 		self.modes = (
 		('Triangle',triRando),
 		('Pair',pairRando),
+		('Circular',circleRando),
 		('Chaos',chaosRando)
 		)
 		
@@ -409,6 +410,29 @@ def triRando(weapons,rhit,rpow):
 			wr = Relation(x,z)
 			wr.setRelation(-hit,-pow)
 			wtalist.append(wr)
+	return wtalist
+
+def circleRando(weapons,rhit,rpow):
+	'''randomize all weapon types into a circle
+	where each type beats one other type and loses to another'''
+	wtalist = []
+	pairings = []
+	random.shuffle(weapons)
+	for v in range(len(weapons)):
+		(z,x) = (weapons[v-1],weapons[v])
+		#prevent the same pairing from happening twice
+		if (z,x) in pairings: continue
+		if (x,z) in weapons: continue
+		hit = random.choice(rhit)
+		pow = random.choice(rpow)
+		wr = Relation(z,x)
+		wr.setRelation(hit,pow)
+		wtalist.append(wr)
+		if z!= x:
+			wr = Relation(x,z)
+			wr.setRelation(-hit,-pow)
+			wtalist.append(wr)
+		pairings.append((z,x))
 	return wtalist
 
 def chaosRando(weapons,rhit,rpow):
