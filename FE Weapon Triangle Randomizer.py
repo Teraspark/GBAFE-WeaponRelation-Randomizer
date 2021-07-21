@@ -267,12 +267,18 @@ class Relation:
 		'''check if first weapon type matches given value'''
 		return self.wt1 == type
 	def output(self):
+		text = ''
 		if self.damage or self.hit:
-			return ('WeaponRelation('+self.wt1+','
+			text += ('WeaponRelation('+self.wt1+','
 			+self.wt2+','+str(self.hit)+','
-			+str(self.damage) + ')')
+			+str(self.damage) + ')  \t')
+		if self.hit > 0 or (not self.hit and self.damage > 0):
+			text += ('//'+self.wt1+' vs '+self.wt2+': Advantage')
+		elif self.hit < 0 or (not self.hit and self.damage < 0):
+			text += ('//'+self.wt1+' vs '+self.wt2+': Disadvantage')
 		else:
-			return ('//'+self.wt1+' vs '+self.wt2+' is a neutral matchup')
+			text += ('//'+self.wt1+' vs '+self.wt2+': Neutral')
+		return text
 
 def genDefs(defpath):
 	'''
