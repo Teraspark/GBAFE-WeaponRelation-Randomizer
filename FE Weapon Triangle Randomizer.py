@@ -39,10 +39,14 @@ class Window:
 	
 	def __init__(self,title="Python GUI"):
 		self.modes = (
-		('Triangle',triRando),
-		('Pair',pairRando),
-		('Circular',circleRando),
-		('Chaos',chaosRando)
+		('Triangle',triRando,\
+			'Create weapon triangles'),
+		('Pair',pairRando,\
+			'generate random relationship pairs.\n If A is set to have an advantage against B, then B will be set to have an equal disadvantage against A'),
+		('Circular',circleRando,\
+			"create a circular relationship where every weapon has an advantage against in the next one in the sequence and has a disadvantage against the previous one"),
+		('Chaos',chaosRando,\
+			'generate random one sided relationships')
 		)
 		
 		self.master = tk.Tk()
