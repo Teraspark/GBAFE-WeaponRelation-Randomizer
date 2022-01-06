@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
-#GBA Fire Emblem Weapon Relation Randomizer
-#by Teraspark
+# GBA Fire Emblem Weapon Relation Randomizer
+# v1.2
+# by Teraspark
 
 import random, glob
 from itertools import product
