@@ -42,8 +42,8 @@ class App:
 		self.modes = (
 		('Triangle',triRando,\
 			'Create weapon triangles'),
-		('Pair',pairRando,\
-			'generate random relationship pairs.\n If A is set to have an advantage against B, then B will be set to have an equal disadvantage against A'),
+		# ('Pair',pairRando,\
+			# 'generate random relationship pairs.\n If A is set to have an advantage against B, then B will be set to have an equal disadvantage against A'),
 		('Circular',circleRando,\
 			"create a circular relationship where every weapon has \n an advantage against in the next one in the sequence"),
 		('Chaos',chaosRando,\
@@ -481,7 +481,91 @@ def genDefs(defpath):
 	x = defpath.with_name(defFile)
 	if not glob.glob(str(x),recursive=False):
 		x.write_text(z)
-		
+
+def circleRando(relations,settings):
+	'''Circular Randomization'''
+	def buildCircle(hit,atk):
+		weapons = list(settings['weaponlist'])
+		wc = [random.choice(weapons)]
+		weapons.remove(wc[-1])
+		while weapons:
+			wlist = list(weapons)
+			for w in wlist:
+				if not relations.isNeutral(wc[-1],w):
+					wlist.remove(w)
+			wc.append(random.choice(wlist))
+			weapons.remove(wc[-1])
+		# atk = random.choice(ratk)
+		# hit = random.choice(rhit)
+		for (n,w) in enumerate(wc):
+			relations.setRelation(wc[n-1],wc[n],hit,atk)
+			if settings['symmetry']:
+				relations.setRelation(wc[n],wc[n-1],-hit,-atk)
+		return
+	
+	rhit = settings['rhit']
+	ratk = settings['ratk']
+	rcnt = settings['rcnt']
+	
+	if settings['rollonce']:
+		ratk = [random.choice(ratk)]
+		rhit = [random.choice(rhit)]
+		rcnt = [random.choice(rcnt)]
+		random.seed(settings['seed'])
+	
+	circles = random.choice(rcnt)
+	for c in range(circles):
+		z = random.choice(rhit)
+		x = random.choice(ratk)
+		buildCircle(z,x)
+		if not settings['symmetry']:
+			z = random.choice(rhit)
+			x = random.choice(ratk)
+			buildCircle(-z,-x)
+	return
+	
+def chaosRando(relations,settings):
+	rhit = settings['rhit']
+	ratk = settings['ratk']
+	rcnt = settings['rcnt']
+	
+	if settings['rollonce']:
+		ratk = [random.choice(ratk)]
+		rhit = [random.choice(rhit)]
+		rcnt = [random.choice(rcnt)]
+		random.seed(settings['seed'])
+	
+	weapons = list(settings['weaponlist'])
+	rc = {}
+	for w in weapons: rc[w]=0
+	
+	for w1 in weapons:
+		count = random.choice(rcnt)
+		c = 0
+		wlist = list(weapons)
+		if settings['selfnull']: wlist.remove(w1)
+		for w in wlist:
+			if not relations.isNeutral(w1,w):
+				wlist.remove(w)
+				c += 1
+			elif rc[w] >= max(rcnt):
+				wlist.remove(w)
+		while c < count and wlist:
+			w2 = random.choice(wlist)
+			wlist.remove(w2)
+			neg = random.choice([1,-1])
+			hit = random.choice(rhit) * neg
+			atk = random.choice(ratk) * neg
+			relations.setRelation(w1,w2,hit,atk)
+			if settings['symmetry'] and w1 != w2:
+				relations.setRelation(w2,w1,-hit,-atk)
+			c += 1
+		rc[w1] = c
+	return
+	
+def triRando(relations,settings):
+	return
+
 def randoStart():
 	'''prepare for randomization without gui'''
 	weapons = WeaponList
@@ -498,105 +582,10 @@ def randoStart():
 	print('WeaponRelationEnd')
 	return
 
-def pairRando(weapons,rhit,ratk):
-	'''weapon relations are random pairings
-	if weapon 1 beats weapon 2 then 2 will lose to 1
-	'''
-	wtalist = []
-	pairings = []
-	for (z,x) in product(weapons,weapons):
-		#skip if pairing already exists
-		if (x,z) in pairings:
-			continue
-		if (z,x) in pairings:
-			continue
-		#decide whether this is
-		#an advantage or disadvantage
-		# or neutral
-		neg = random.choice([1,0,-1])
-		hit = random.choice(rhit) * neg
-		atk = random.choice(ratk) * neg
-		wr = Relation(z,x)
-		wr.setRelation(hit,atk)
-		wtalist.append(wr)
-		if z != x:
-			wr = Relation(x,z)
-			wr.setRelation(-hit,-atk)
-			wtalist.append(wr)
-		pairings.append((z,x))
-	return wtalist
-
-def triRando(weapons,rhit,ratk):
-	'''randomize to make weapon triangles
-	return list of weapon relations'''
-	wtalist = []
-	
-	while(len(weapons) >= 3):
-		#grab 3 random weapon types
-		w = [None] * 3
-		for x in range(3):
-			w[x] = random.choice(weapons)
-			#remove them from the pool
-			weapons.remove(w[x])
-		#roll for hit and/or damage bonuses if necessary
-		hit = random.choice(rhit)
-		atk = random.choice(ratk)
-		#create weapon triangle
-		for (z,x) in ((w[0],w[1]),(w[1],w[2]),(w[2],w[0])):
-			#z has advantage over x
-			wr = Relation(z,x)
-			wr.setRelation(hit,atk)
-			wtalist.append(wr)
-			#x has disadvantage to z
-			wr = Relation(x,z)
-			wr.setRelation(-hit,-atk)
-			wtalist.append(wr)
-	return wtalist
-
-def circleRando(weapons,rhit,ratk):
-	'''randomize all weapon types into a circle
-	where each type beats one other type and loses to another'''
-	wtalist = []
-	pairings = []
-	random.shuffle(weapons)
-	for v,weapon in enumerate(weapons):
-		(z,x) = (weapons[v-1],weapons[v])
-		#prevent the same pairing from happening twice
-		if (z,x) in pairings: continue
-		if (x,z) in weapons: continue
-		hit = random.choice(rhit)
-		atk = random.choice(ratk)
-		wr = Relation(z,x)
-		wr.setRelation(hit,atk)
-		wtalist.append(wr)
-		if z!= x:
-			wr = Relation(x,z)
-			wr.setRelation(-hit,-atk)
-			wtalist.append(wr)
-		pairings.append((z,x))
-	return wtalist
-
-def chaosRando(weapons,rhit,ratk):
-	'''weapon relations are completely random
-	return list of one sided weapon relations'''
-	wtalist=[]
-	for (z,x) in product(weapons,weapons):
-		wr = Relation(z,x)
-		#decide whether this is
-		#an advantage or disadvantage
-		# or neutral
-		neg = random.choice([1,0,-1])
-		# if neg: #skip if 0
-		hit = random.choice(rhit) * neg
-		atk = random.choice(ratk) * neg
-		wr.setRelation(hit,atk)
-		wtalist.append(wr)
-	return wtalist
-
 if __name__ == '__main__':
 	if GUI:
 		app = App("GBAFE Weapon Relation Randomizer")
 	else:
 		randoStart()
 		input('Press enter to continue \n')
-	
+
