@@ -186,11 +186,11 @@ class App:
 		#randomizer settings
 		configtitle = ttk.Label(modeconfig,text='Options')
 		configtitle.grid(row=0)
-		self.values['pair'] = tk.IntVar()
+		self.values['pair'] = tk.IntVar(value=1)
 		paircheck = ttk.Checkbutton(modeconfig,variable=self.values['pair'],text='Symmetry')
 		paircheck.grid(row=1,sticky=tk.W)
 		CreateToolTip(paircheck,'When checked, ensure that all relations go both ways\n(If Swords beat Axes, Axes will lose to Swords)')
-		self.values['selfnull'] = tk.IntVar()
+		self.values['selfnull'] = tk.IntVar(value=1)
 		selfneutral = ttk.Checkbutton(modeconfig,variable=self.values['selfnull'],text='Self Neutrality')
 		selfneutral.grid(row=2,sticky=tk.W)
 		CreateToolTip(selfneutral,'When checked, even weapon vs itself matchup will be neutral')
