@@ -10,7 +10,7 @@ from string import ascii_letters as Letterlist
 from string import digits as Numberlist
 
 GUI = True #command line version not implemented yet
-defFile = "WeaponRelationDefs.event"
+def_file = "WeaponRelationDefs.event"
 
 #defualt List of weapon types
 WeaponList = ('Sword','Lance','Axe','Bow','Light','Anima','Dark','Monster')
@@ -40,23 +40,23 @@ class App:
 	
 	def __init__(self,title="Python GUI"):
 		self.modes = (
-		('Triangle',triRando,\
+		('Triangle',tri_rando,\
 			'Create weapon triangles'),
 		# ('Pair',pairRando,\
 			# 'generate random relationship pairs.\n If A is set to have an advantage against B, then B will be set to have an equal disadvantage against A'),
-		('Circular',circleRando,\
+		('Circular',circle_rando,\
 			"create a circular relationship where every weapon has \n an advantage against in the next one in the sequence"),
-		('Chaos',chaosRando,\
+		('Chaos',chaos_rando,\
 			'generate completely random relationships')
 		)
 		
 		self.master = tk.Tk()
 		self.master.title(title)
 		self.master.geometry('500x500')
-		self.buildUI()
+		self.build_ui()
 		self.master.mainloop()
 		
-	def buildUI(self):
+	def build_ui(self):
 		self.frames = {}
 		self.values = {}
 		self.widgets = {} #hold widgets we might access later
@@ -297,7 +297,7 @@ class App:
 			output += '\tSymmetry: ' + str(settings['symmetry']) + '\n'
 			output += '\tSelf Neutral: ' + str(settings['selfnull']) + '\n'
 			output += '*/\n\n'
-			output += '#include "'+defFile+'"\n\n'
+			output += '#include "'+def_file+'"\n\n'
 			#print relations
 			weapons = self.widgets['wpool'].get(0,tk.END)
 			for w1 in settings['weaponlist']:
@@ -478,13 +478,13 @@ def genDefs(defpath):
 
 #endif
 	'''
-	x = defpath.with_name(defFile)
+	x = defpath.with_name(def_file)
 	if not glob.glob(str(x),recursive=False):
 		x.write_text(z)
 
-def circleRando(relations,settings):
+def circle_rando(relations,settings):
 	'''Circular Randomization'''
-	def buildCircle(hit,atk):
+	def build_circle(hit,atk):
 		weapons = list(settings['weaponlist'])
 		wc = [random.choice(weapons)]
 		weapons.remove(wc[-1])
@@ -517,14 +517,14 @@ def circleRando(relations,settings):
 	for c in range(circles):
 		z = random.choice(rhit)
 		x = random.choice(ratk)
-		buildCircle(z,x)
+		build_circle(z,x)
 		if not settings['symmetry']:
 			z = random.choice(rhit)
 			x = random.choice(ratk)
-			buildCircle(-z,-x)
+			build_circle(-z,-x)
 	return
 	
-def chaosRando(relations,settings):
+def chaos_rando(relations,settings):
 	rhit = settings['rhit']
 	ratk = settings['ratk']
 	rcnt = settings['rcnt']
@@ -563,10 +563,10 @@ def chaosRando(relations,settings):
 		rc[w1] = c
 	return
 	
-def triRando(relations,settings):
+def tri_rando(relations,settings):
 	return
 
-def randoStart():
+def rando_start():
 	'''prepare for randomization without gui'''
 	weapons = WeaponList
 	#Get list of weapon types from ui
@@ -586,6 +586,6 @@ if __name__ == '__main__':
 	if GUI:
 		app = App("GBAFE Weapon Relation Randomizer")
 	else:
-		randoStart()
+		rando_start()
 		input('Press enter to continue \n')
 
