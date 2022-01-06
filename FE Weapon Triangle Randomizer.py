@@ -564,6 +564,58 @@ def chaos_rando(relations,settings):
 	return
 	
 def tri_rando(relations,settings):
+	'''Triangular Randomization'''
+	random.seed(settings['seed'])
+	rhit = settings['rhit']
+	ratk = settings['ratk']
+	rcnt = settings['rcnt']
+	
+	if settings['rollonce']:
+		ratk = [random.choice(ratk)];
+		rhit = [random.choice(rhit)];
+		rcnt = [random.choice(rcnt)];
+		random.seed(settings['seed'])
+	
+	weapons = list(settings['weaponlist'])
+	tc = {}
+	for w in weapons: tc[w]=0
+	
+	for w1 in weapons:
+		weapons = list(settings['weaponlist'])
+		weapons.remove(w1)
+		wlist = list(weapons)
+		
+		count = random.choice(rcnt)
+		
+		for w in weapons:
+			if not relations.isNeutral(w1,w):
+				wlist.remove(w)
+			elif tc[w] >= max(rcnt):
+				wlist.remove(w)
+		
+		while tc[w1] < count and len(wlist) >= 2:
+			w2 = random.choice(wlist)
+			wlist.remove(w2)
+			w3 = random.choice(wlist)
+			wlist.remove(w3)
+			neg = random.choice([1,-1])
+			hit = random.choice(rhit) * neg
+			atk = random.choice(ratk) * neg
+			relations.setRelation(w1,w2,hit,atk)
+			relations.setRelation(w2,w3,hit,atk)
+			relations.setRelation(w3,w1,hit,atk)
+			
+			if settings['symmetry']:
+				relations.setRelation(w2,w1,-hit,-atk)
+				relations.setRelation(w3,w2,-hit,-atk)
+				relations.setRelation(w1,w3,-hit,-atk)
+				tc[w1]+=2
+				tc[w2]+=2
+				tc[w3]+=2
+			else:
+				tc[w1]+=1
+				tc[w2]+=1
+				tc[w3]+=1
 	return
 
 def rando_start():
