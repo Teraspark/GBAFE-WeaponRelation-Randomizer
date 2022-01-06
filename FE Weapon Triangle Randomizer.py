@@ -2,13 +2,14 @@ import random, glob
 from itertools import product
 from pathlib import Path
 import tkinter as tk
+from tkinter import ttk
 from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import asksaveasfilename
 from tkinter import messagebox
 from string import ascii_letters as Letterlist
 from string import digits as Numberlist
 
-GUI = True
+GUI = True #command line version not implemented yet
 defFile = "WeaponRelationDefs.event"
 
 #defualt List of weapon types
@@ -30,7 +31,7 @@ def isValidFile(file):
 		return False
 	return file.is_file()
 
-class Window:
+class App:
 	'''
 	UI for the randomizer
 	self.master is the tk root
@@ -44,213 +45,277 @@ class Window:
 		('Pair',pairRando,\
 			'generate random relationship pairs.\n If A is set to have an advantage against B, then B will be set to have an equal disadvantage against A'),
 		('Circular',circleRando,\
-			"create a circular relationship where every weapon has an advantage against in the next one in the sequence and has a disadvantage against the previous one"),
+			"create a circular relationship where every weapon has \n an advantage against in the next one in the sequence"),
 		('Chaos',chaosRando,\
-			'generate random one sided relationships')
+			'generate completely random relationships')
 		)
 		
 		self.master = tk.Tk()
 		self.master.title(title)
-		self.master.geometry('500x420')
+		self.master.geometry('500x500')
 		self.buildUI()
 		self.master.mainloop()
 		
 	def buildUI(self):
-		self.mainframe = tk.Frame(self.master)
-		self.mainname = tk.Label(self.master,text='Weapon Relation Randomizer')
-		self.mainname.pack(side=tk.TOP)
-		# self.mainname.grid(row=0,padx=5,columnspan=3,sticky=tk.E+tk.W)
+		self.frames = {}
+		self.values = {}
+		self.widgets = {} #hold widgets we might access later
 		
-		self.topbox = tk.Frame(self.mainframe)
-		self.topbox.grid(row=1,column=0,rowspan=2,columnspan=3)
+		self.mainframe = ttk.Frame(self.master)
+		self.mainname = ttk.Label(self.master,text='Weapon Relation Randomizer')
+		self.mainname.pack(side=tk.TOP)
+		
+		
+		topbox = ttk.Frame(self.mainframe)
+		topbox.grid(row=1,column=0,rowspan=2,columnspan=3)
+		self.frames['topbox'] =  topbox
 		
 		#setup seed ui
-		self.seed = tk.StringVar()
-		self.seedname = tk.Label(self.topbox,text='Seed:')
-		self.seedname.grid(row=0,column=1,sticky=tk.E,padx=2)
-		self.seedentry = tk.Entry(self.topbox,textvariable=self.seed)
-		self.seedentry.grid(row=0,column=2,columnspan=2,sticky=tk.E+tk.W)
-		self.seedchange = tk.Button(self.topbox,text='New Seed',command=self.newseed)
-		self.seedchange.grid(row=0,column=4,sticky=tk.W,padx=2,pady=2)
+		self.values['seed'] = tk.StringVar()
+		seedname = ttk.Label(topbox,text='Seed:')
+		seedname.grid(row=0,column=1,sticky=tk.E,padx=2)
+		seedentry = ttk.Entry(topbox,textvariable=self.values['seed'])
+		seedentry.grid(row=0,column=2,columnspan=2,sticky=tk.E+tk.W)
+		seedchange = ttk.Button(topbox,text='New Seed',command=self.newseed)
+		seedchange.grid(row=0,column=4,sticky=tk.W,padx=2,pady=2)
+		
+		CreateToolTip(seedchange,'Generate a new seed')
+		
 		#setup output file selection ui
-		self.outfile = tk.StringVar()
-		self.outname = tk.Label(self.topbox,text='File:')
-		self.outname.grid(row=1,column=1,sticky=tk.E,padx=2)
-		self.outentry = tk.Entry(self.topbox,textvariable=self.outfile)
-		self.outentry.grid(row=1,column=2,columnspan=2,sticky=tk.E+tk.W)
-		self.outfind = tk.Button(self.topbox,text=' Browse...',command=self.loadfile)
-		self.outfind.grid(row=1,column=4,sticky=tk.W,padx=2,pady=3)
-			
-		self.statbox = tk.Frame(self.mainframe,highlightbackground='black',highlightthickness=1)
-		self.poolbox = tk.Frame(self.mainframe)
-		self.modebox = tk.Frame(self.mainframe)
-		self.statbox.grid(row=3,column=0,rowspan=2,columnspan=3,ipady=5,sticky=(tk.E+tk.W))
-		self.modebox.grid(row=5,column=0,rowspan=2,columnspan=3,ipadx=5)
-		self.poolbox.grid(row=3,column=3,rowspan=4,columnspan=2,pady=5,padx=5)
+		self.values['outfile'] = tk.StringVar()
+		outname = ttk.Label(topbox,text='File:')
+		outname.grid(row=1,column=1,sticky=tk.E,padx=2)
+		outentry = ttk.Entry(topbox,textvariable=self.values['outfile'])
+		outentry.grid(row=1,column=2,columnspan=2,sticky=tk.E+tk.W)
+		outfind = ttk.Button(topbox,text=' Browse...',command=self.loadfile)
+		outfind.grid(row=1,column=4,sticky=tk.W,padx=2,pady=3)
+		
+		statbox = ttk.Frame(self.mainframe)
+		poolbox = ttk.Frame(self.mainframe)
+		modebox = ttk.Frame(self.mainframe)
+		modeconfig = ttk.Frame(self.mainframe)
+		statbox.grid(row=3,column=0,rowspan=2,columnspan=3,ipady=5,sticky=(tk.E+tk.W))
+		modebox.grid(row=5,column=0,rowspan=2,columnspan=1,ipadx=5,sticky=tk.N)
+		poolbox.grid(row=3,column=3,rowspan=4,columnspan=2,pady=5,padx=5)
+		modeconfig.grid(row=5,column=1,rowspan=2,sticky=tk.N)
 		
 		#List of weapon types
-		self.wpoolname = tk.Label(self.poolbox,text='Weapons Pool')
-		self.wpoolname.grid(row=0,column=0,columnspan=3)
-		self.wpool = tk.Listbox(self.poolbox)
-		self.wpool.grid(row=1,rowspan=3,columnspan=3,sticky=tk.E+tk.W,pady=5)
-		self.poolpop = tk.Button(self.poolbox,text='Remove',command=self.wremove)
-		self.poolpush = tk.Button(self.poolbox,text='Add',command=self.winsert)
-		self.input = tk.Entry(self.poolbox)
-		self.poolpop.grid(row=4,column=0,columnspan=3,sticky=tk.E+tk.W)
-		self.input.grid(row=5,column=0,columnspan=2)
-		self.poolpush.grid(row=5,column=2)
+		self.frames['poolbox'] = poolbox
+		self.values['pooladd'] = tk.StringVar()
+		wpoolname = ttk.Label(poolbox,text='Weapons Pool')
+		wpoolname.grid(row=0,column=0,columnspan=3)
+		wpool = tk.Listbox(poolbox)
+		wpool.grid(row=1,rowspan=3,columnspan=3,sticky=tk.E+tk.W,pady=5)
+		poolpop = ttk.Button(poolbox,text='Remove',command=self.wremove)
+		poolpush = ttk.Button(poolbox,text='Add',command=self.winsert)
+		poolinput = ttk.Entry(poolbox,textvariable=self.values['pooladd'])
+		poolpop.grid(row=4,column=0,columnspan=3,sticky=tk.E+tk.W)
+		poolinput.grid(row=5,column=0,columnspan=2)
+		poolpush.grid(row=5,column=2)
+		poolscroll = ttk.Scrollbar(poolbox, orient=tk.VERTICAL, command=wpool.yview)
+		poolscroll.grid(row=1,column=3,rowspan=3,sticky=tk.N+tk.S+tk.W)
+		wpool['yscrollcommand'] = poolscroll.set
+		
 		#add default weapon types to pool
-		for w in WeaponList: self.wpool.insert(tk.END,w)
+		for w in WeaponList: wpool.insert(tk.END,w)
+		self.widgets['wpool'] = wpool
 		
 		#set range for stat variation
-		self.minhit = tk.IntVar()
-		self.maxhit = tk.IntVar()
-		self.minatk = tk.IntVar()
-		self.maxatk = tk.IntVar()
-		self.singleroll = tk.IntVar()
-		self.statword = tk.Label(self.statbox,text='Weapon Advantage')
-		self.maxword = tk.Label(self.statbox,text='Max')
-		self.minword = tk.Label(self.statbox,text='Min')
-		self.hitword = tk.Label(self.statbox,text='Accuracy')
-		self.atkword = tk.Label(self.statbox,text='Damage')
-		self.statword.grid(row=0,columnspan=3)
-		self.minword.grid(row=1,column=1)
-		self.maxword.grid(row=1,column=2)
-		self.hitword.grid(row=2,column=0)
-		self.atkword.grid(row=3,column=0)
-		self.minhitdata = tk.Spinbox(self.statbox,from_=0,to=100,increment=5,textvariable=self.minhit,width=10,command=self.adjustmin)
-		self.maxhitdata = tk.Spinbox(self.statbox,from_=5,to=100,increment=5,textvariable=self.maxhit,width=10,command=self.adjustmax)
-		self.minhitdata.grid(row=2,column=1)
-		self.maxhitdata.grid(row=2,column=2)
-		self.minatkdata = tk.Spinbox(self.statbox,from_=0,to=15,textvariable=self.minatk,width=10,command=self.adjustmin)
-		self.maxatkdata = tk.Spinbox(self.statbox,from_=0,to=15,textvariable=self.maxatk,width=10,command=self.adjustmax)
-		self.minatkdata.grid(row=3,column=1)
-		self.maxatkdata.grid(row=3,column=2)
-		self.rollcheck = tk.Checkbutton(self.statbox,text='Roll Once',variable=self.singleroll)
-		self.rollcheck.grid(row=4,columnspan=3)
+		self.frames['statbox'] = statbox
+		self.values['minatk'] = tk.IntVar()
+		self.values['maxatk'] = tk.IntVar()
+		self.values['minhit'] = tk.IntVar()
+		self.values['maxhit'] = tk.IntVar()
+		self.values['minrel'] = tk.IntVar()
+		self.values['maxrel'] = tk.IntVar()
+		self.values['singleroll'] = tk.IntVar()
+		statword = ttk.Label(statbox,text='Weapon Advantage')
+		maxword = ttk.Label(statbox,text='Max')
+		minword = ttk.Label(statbox,text='Min')
+		hitword = ttk.Label(statbox,text='Accuracy')
+		atkword = ttk.Label(statbox,text='Damage')
+		statword.grid(row=0,columnspan=4)
+		minword.grid(row=1,column=2)
+		maxword.grid(row=1,column=3)
+		hitword.grid(row=2,column=0)
+		atkword.grid(row=3,column=0)
+		minhitdata = ttk.Spinbox(statbox,from_=0,to=100,increment=5,textvariable=self.values['minhit'],width=10,command=self.adjustmin)
+		maxhitdata = ttk.Spinbox(statbox,from_=5,to=100,increment=5,textvariable=self.values['maxhit'],width=10,command=self.adjustmax)
+		minhitdata.grid(row=2,column=2)
+		maxhitdata.grid(row=2,column=3)
+		minatkdata = ttk.Spinbox(statbox,from_=0,to=15,textvariable=self.values['minatk'],width=10,command=self.adjustmin)
+		maxatkdata = ttk.Spinbox(statbox,from_=0,to=15,textvariable=self.values['maxatk'],width=10,command=self.adjustmax)
+		minatkdata.grid(row=3,column=2)
+		maxatkdata.grid(row=3,column=3)
+		relword = ttk.Label(statbox,text='Count')
+		relword.grid(row=4,column=0)
+		minreldata = ttk.Spinbox(statbox,from_=1,to=len(WeaponList),textvariable=self.values['minrel'],width=10,command=self.adjustmin)
+		maxreldata = ttk.Spinbox(statbox,from_=1,to=len(WeaponList),textvariable=self.values['maxrel'],width=10,command=self.adjustmax)
+		minreldata.grid(row=4,column=2)
+		maxreldata.grid(row=4,column=3)
 		
-		self.minhit.set(15)
-		self.maxhit.set(15)
-		self.minatk.set(1)
-		self.maxatk.set(1)
+		self.widgets['minreldata']=minreldata
+		self.widgets['maxreldata']=maxreldata
+		CreateToolTip(relword,'Amount of relations to give to each weapon')
+		
+		rollcheck = ttk.Checkbutton(statbox,text='Roll Once',variable=self.values['singleroll'])
+		rollcheck.grid(row=5,columnspan=4)
+		
+		CreateToolTip(rollcheck,'roll once and use the same \n values for every relation')
+		
+		#set default values
+		self.values['minhit'].set(15)
+		self.values['maxhit'].set(15)
+		self.values['minatk'].set(1)
+		self.values['maxatk'].set(1)
+		self.values['minrel'].set(1)
+		self.values['maxrel'].set(1)
 		
 		#randomizer mode selection
-		self.randomode = tk.IntVar()
-		self.modetitle = tk.Label(self.modebox,text='Mode')
-		self.modetitle.grid(row=0)
-		self.randoptions = []
+		self.frames['modebox'] = modebox
+		self.frames['modeconfig'] = modeconfig
+		self.values['randomode'] = tk.IntVar()
+		modetitle = ttk.Label(modebox,text='Mode')
+		modetitle.grid(row=0)
+		
 		for (z,m) in enumerate(self.modes):
-			mode = tk.Radiobutton(self.modebox,text=m[0],value=z,variable=self.randomode)
-			self.randoptions.append(mode)
+			mode = ttk.Radiobutton(modebox,text=m[0],value=z,variable=self.values['randomode'])
 			mode.grid(row=z+1,sticky=tk.W)
+			CreateToolTip(mode,m[2])
+		
+		#randomizer settings
+		configtitle = ttk.Label(modeconfig,text='Options')
+		configtitle.grid(row=0)
+		self.values['pair'] = tk.IntVar()
+		paircheck = ttk.Checkbutton(modeconfig,variable=self.values['pair'],text='Symmetry')
+		paircheck.grid(row=1,sticky=tk.W)
+		CreateToolTip(paircheck,'When checked, ensure that all relations go both ways\n(If Swords beat Axes, Axes will lose to Swords)')
+		self.values['selfnull'] = tk.IntVar()
+		selfneutral = ttk.Checkbutton(modeconfig,variable=self.values['selfnull'],text='Self Neutrality')
+		selfneutral.grid(row=2,sticky=tk.W)
+		CreateToolTip(selfneutral,'When checked, even weapon vs itself matchup will be neutral')
 		
 		#button to start randomization
-		self.run = tk.Button(self.mainframe,text='Randomize',command=self.randomize)
-		self.run.grid(row=7,column=0,columnspan=5,pady=5,sticky=tk.E+tk.W)
+		run = ttk.Button(self.mainframe,text='Randomize',command=self.randomize)
+		run.grid(row=7,column=0,columnspan=5,pady=5,sticky=tk.E+tk.W)
+		CreateToolTip(run,"Start the randomizer")
+		
 		
 		self.mainframe.pack()
 		
 	def adjustmin(self):
 		'''ensure the min values never rise above the max values'''
-		if self.minhit.get() > self.maxhit.get():
-			self.maxhit.set(self.minhit.get())
-		if self.minatk.get() > self.maxatk.get():
-			self.maxatk.set(self.minatk.get())
+		if self.values['minhit'].get() > self.values['maxhit'].get():
+			self.values['maxhit'].set(self.values['minhit'].get())
+		if self.values['minatk'].get() > self.values['maxatk'].get():
+			self.values['maxatk'].set(self.values['minatk'].get())
+		if self.values['minrel'].get() > self.values['maxrel'].get():
+			self.values['maxrel'].set(self.values['minrel'].get())
 	def adjustmax(self):
 		'''ensure the max values never fall below the min values'''
-		if self.maxhit.get() < self.minhit.get():
-			self.minhit.set(self.maxhit.get())
-		if self.maxatk.get() < self.minatk.get():
-			self.minatk.set(self.maxatk.get())
-		
+		if self.values['maxhit'].get() < self.values['minhit'].get():
+			self.values['minhit'].set(self.values['maxhit'].get())
+		if self.values['maxatk'].get() < self.values['minatk'].get():
+			self.values['minatk'].set(self.values['maxatk'].get())
+		if self.values['maxrel'].get() < self.values['minrel'].get():
+			self.values['minrel'].set(self.values['maxrel'].get())
 	def wremove(self):
 		'''
-		remove selected weapon type
+		remove selected weapon type from pool
 		'''
-		z = self.wpool.curselection()
-		if z: self.wpool.delete(z)
+		z = self.widgets['wpool'].curselection()
+		if z: self.widgets['wpool'].delete(z)
 		
 	def winsert(self):
 		'''
 		add weapon type to pool
 		'''
-		z = self.input.get()
-		if z: self.wpool.insert(tk.END,z)
+		z = self.values['pooladd'].get()
+		if z: self.widgets['wpool'].insert(tk.END,z)
 		
 	def newseed(self):
 		random.seed()
 		nseed = ''.join(random.choice(Numberlist+Letterlist) for _ in range(10))
-		self.seed.set(nseed)
+		self.values['seed'].set(nseed)
 		
 	def loadfile(self):
 		file = askForFileOut((('Event File(EA)','*.event'),))
 		
 		if file != Path():
 			if not file.suffix: file = file.with_suffix('.event')
-			self.outfile.set(str(file))
-		
+			self.values['outfile'].set(str(file))
+	
 	def randomize(self):
 		'''start randomization for gui'''
-		# modes = (triRando,chaosRando)
-		weapons = self.wpool.get(0,tk.END)
-		wrlist=[]
+		settings = {}
+		settings['weaponlist'] = self.widgets['wpool'].get(0,tk.END)
+		wrlist = RelationList(settings['weaponlist'])
 		
-		(min,max) = (self.minatk.get(),self.maxatk.get())
-		ratk = range(min,max+1)
-		(min,max) = (self.minhit.get(),self.maxhit.get())
-		rhit = range(min,max+1,5)
+		(min,max) = (self.values['minatk'].get(),self.values['maxatk'].get())
+		settings['ratk'] = range(min,max+1)
+		(min,max) = (self.values['minhit'].get(),self.values['maxhit'].get())
+		settings['rhit'] = range(min,max+1,5)
+		(min,max) = (self.values['minrel'].get(),self.values['maxrel'].get())
+		settings['rcnt'] = range(min,max+1)
 		
+		settings['symmetry'] = bool(self.values['pair'].get())
+		settings['rollonce'] = bool(self.values['singleroll'].get())
+		settings['selfnull'] = bool(self.values['selfnull'].get())
 		
 		#set randomizer seed
-		if not self.seed.get(): self.newseed()
-		random.seed(self.seed.get())
+		if not self.values['seed'].get(): self.newseed()
+		settings['seed'] = self.values['seed'].get()
 		
-		if self.singleroll.get():
-			ratk = [random.choice(ratk)]
-			rhit = [random.choice(rhit)]
-			random.seed(self.seed.get())
-			
-		m = self.randomode.get()
+		# if self.values['singleroll'].get():
+			# ratk = [random.choice(ratk)]
+			# rhit = [random.choice(rhit)]
+			# random.seed(self.values['seed'].get())
+		
+		
+		m = self.values['randomode'].get()
 		if m in range(len(self.modes)):
-			wrlist = self.modes[m][1](list(weapons),rhit,ratk)
-			# print('WeaponRelations:')
-			# for wr in wrlist:
-				# print(wr.output())
-			# print('WeaponRelationEnd')
-			self.writefile(wrlist,weapons,m)
-			
-		
-	def writefile(self,relations,weapons,mode):
-		if not (self.outfile.get()):
+			self.modes[m][1](wrlist,settings)
+			self.writefile(wrlist,settings,m)
+		return
+	
+	def writefile(self,relations,settings,mode):
+		def printMacro(rw1,rw2,wr):
+			return 'WeaponRelation('+rw1+','+rw2+\
+			','+str(wr['hit'])+','+str(wr['atk'])+')'
+		if not self.values['outfile'].get():
 			self.loadfile()
-		if (self.outfile.get()):
+		if self.values['outfile'].get():
+			#write seed and settings to file
 			output = '/* '
 			output += 'Weapon Relations Randomizer\n\n'
-			output += 'Seed: ' + self.seed.get() + '\n'
+			output += 'Seed: ' + settings['seed'] + '\n'
 			output += 'Mode: ' + self.modes[mode][0] + '\n'
 			output += 'Settings:\n'
-			output += '\tAccuracy\tMin: ' + str(self.minhit.get())+ '\tMax: ' + str(self.maxhit.get()) + '\n'
-			output += '\tDamage\t\tMin: ' + str(self.minatk.get()) + '\tMax: ' + str(self.maxatk.get())+'\n'
-			output += '\tSingleRoll: ' + str(bool(self.singleroll.get())) + '\n'
+			output += '\tAccuracy\tMin: ' + str(min(settings['rhit']))+ '\tMax: ' + str(max(settings['rhit']))+'\n'
+			output += '\tDamage\t\tMin: ' + str(min(settings['ratk']))+ '\tMax: ' + str(max(settings['ratk']))+'\n'
+			output += '\tSingleRoll: ' + str(settings['rollonce']) + '\n'
+			output += '\tSymmetry: ' + str(settings['symmetry']) + '\n'
+			output += '\tSelf Neutral: ' + str(settings['selfnull']) + '\n'
 			output += '*/\n\n'
-			
 			output += '#include "'+defFile+'"\n\n'
-			output += 'WeaponRelationships:\n'
-			for w in weapons:
-				output += '//' +w + ' Relations\n'
-				for r in relations:
-					if r.isAttacker(w): output+= r.output()+'\n'
-				output+='\n'
+			#print relations
+			weapons = self.widgets['wpool'].get(0,tk.END)
+			for w1 in settings['weaponlist']:
+				output += '//' +w1 + ' Relations\n'
+				for w2 in settings['weaponlist']:
+					r = relations.getRelation(w1,w2)
+					if r['atk'] or r['hit']:
+						output += printMacro(w1,w2,r)+'\t  '
+					output +='//'+relations.matchup(w1,w2)+'\n'
+				output+= '\n'
 			output += 'WeaponRelationEnd\n'
 			output += '\n// **Any Relation that is not shown here is neutral**\n'
-			Path(self.outfile.get()).write_text(output)
-			genDefs(Path(self.outfile.get()))
+			#generate file
+			Path(self.values['outfile'].get()).write_text(output)
+			genDefs(Path(self.values['outfile'].get()))
 			prompt = messagebox.showinfo(title='Randomizing Complete!',message='Randomzing Complete!')
-	
-class Relation:
-	'''
-	Set up the relationship for when the
-	first weapon type attacks the second
+			return
+
 class ToolTip(object):
 	'''create a tooltip for a given widget'''
 	def __init__(self, widget):
@@ -290,38 +355,55 @@ def CreateToolTip(widget, text):
 	widget.bind('<Enter>', enter)
 	widget.bind('<Leave>', leave)
 	
-	damage = damage modifier
+class RelationList:
+	'''
+	pow = damage modifier
 	hit = accuracy modifier
 	
-	wt1 = first weapon type
-	wt2 = second weapon type
+	
 	'''
-	def __init__(self,w1,w2,hit=0,damage=0):
-		self.wt1 = w1
-		self.wt2 = w2
+	
+	def __init__(self,wlist):
+		'''
+		wlist is the list of weapon types
+		'''
+		self.rlist = dict()
+		for w1 in wlist:
+			self.rlist[w1] = dict()
+		for (w1,w2) in product(wlist,wlist):
+			self.rlist[w1][w2] = {'atk':0,'hit':0}
+		
+	def setRelation(self,w1,w2,accuracy=0,damage=0):
+		self.rlist[w1][w2]['atk'] = damage
+		self.rlist[w1][w2]['hit'] = accuracy
 		return
 	
-	def setRelation(self,hit=0,damage=0):
-		self.damage = damage
-		self.hit = hit
-		return
-	def isAttacker(self,type):
-		'''check if first weapon type matches given value'''
-		return self.wt1 == type
-	def output(self):
+	def getRelation(self,w1,w2):
+		return self.rlist[w1][w2]
+	
+	def isNeutral(self,w1,w2):
+		r = self.rlist[w1][w2]
+		a = r['atk']
+		h = r['hit']
+		z = not (a or h)
+		return z
+	
+	def matchup(self,w1,w2):
 		text = ''
-		if self.damage or self.hit:
-			text += ('WeaponRelation('+self.wt1+','
-			+self.wt2+','+str(self.hit)+','
-			+str(self.damage) + ')  \t')
-		if self.hit > 0 or (not self.hit and self.damage > 0):
-			text += ('//'+self.wt1+' vs '+self.wt2+': Advantage')
-		elif self.hit < 0 or (not self.hit and self.damage < 0):
-			text += ('//'+self.wt1+' vs '+self.wt2+': Disadvantage')
+		# if self.rlist[w1][w2]['atk'] or self.rlist[w1][w2]['hit']:
+			# text += ('WeaponRelation('+self.wt1+','
+			# +self.wt2+','+str(self.rlist[w1][w2]['hit'])+','
+			# +str(self.rlist[w1][w2]['atk']) + ')  \t')
+			
+		if self.rlist[w1][w2]['hit'] > 0 or (not self.rlist[w1][w2]['hit'] and self.rlist[w1][w2]['atk'] > 0):
+			text += (w1+' vs '+w2 + ': Advantage')
+		elif self.rlist[w1][w2]['hit'] < 0 or (not self.rlist[w1][w2]['hit'] and self.rlist[w1][w2]['atk'] < 0):
+			text += (w1+' vs '+w2+ ': Disadvantage')
 		else:
-			text += ('//'+self.wt1+' vs '+self.wt2+': Neutral')
+			text += (w1+' vs '+w2 +': Neutral')
+		
 		return text
-
+		
 def genDefs(defpath):
 	'''
 	generate the definitions file if it 
@@ -513,7 +595,7 @@ def chaosRando(weapons,rhit,ratk):
 
 if __name__ == '__main__':
 	if GUI:
-		app = Window("GBAFE Weapon Relation Randomizer")
+		app = App("GBAFE Weapon Relation Randomizer")
 	else:
 		randoStart()
 		input('Press enter to continue \n')
