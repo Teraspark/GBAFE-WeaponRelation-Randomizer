@@ -200,7 +200,6 @@ class App:
 		run.grid(row=7,column=0,columnspan=5,pady=5,sticky=tk.E+tk.W)
 		CreateToolTip(run,"Start the randomizer")
 		
-		
 		self.mainframe.pack()
 		
 	def adjustmin(self):
@@ -234,7 +233,6 @@ class App:
 		if z: self.widgets['wpool'].insert(tk.END,z)
 		
 	def newseed(self):
-		random.seed()
 		nseed = ''.join(random.choice(Numberlist+Letterlist) for _ in range(10))
 		self.values['seed'].set(nseed)
 		
@@ -503,6 +501,7 @@ def circle_rando(relations,settings):
 				relations.setRelation(wc[n],wc[n-1],-hit,-atk)
 		return
 	
+	random.seed(settings['seed'])
 	rhit = settings['rhit']
 	ratk = settings['ratk']
 	rcnt = settings['rcnt']
@@ -525,6 +524,8 @@ def circle_rando(relations,settings):
 	return
 	
 def chaos_rando(relations,settings):
+	'''Chaotic Randomization'''
+	random.seed(settings['seed'])
 	rhit = settings['rhit']
 	ratk = settings['ratk']
 	rcnt = settings['rcnt']
