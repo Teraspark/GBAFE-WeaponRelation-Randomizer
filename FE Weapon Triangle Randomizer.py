@@ -1,3 +1,8 @@
+#!/usr/bin/python3
+
+#GBA Fire Emblem Weapon Relation Randomizer
+#by Teraspark
+
 import random, glob
 from itertools import product
 from pathlib import Path
