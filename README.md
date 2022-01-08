@@ -14,9 +14,6 @@ You can randomize the bonus accuracy and damage given in a weapon relation
   ### Circular
   creates a circular relationship where every weapon has an advantage against in the next one in the sequence and has a disadvantage against the previous one
   
-  ### Pair
-  this mode generates random relationship pairs. If A is set to have an advantage against B, then B will be set to have an equal disadvantage against A
-  
   ### Chaos
   this mode generates random one sided relationships. it could lead to interesting situations like a weapon having the advantage against itself or having a disadvantage to almost every other type in the pool
 
