@@ -58,7 +58,7 @@ class App:
 		
 		self.master = tk.Tk()
 		self.master.title(title)
-		self.master.geometry('500x500')
+		self.master.geometry('500x400')
 		self.build_ui()
 		self.master.mainloop()
 		
