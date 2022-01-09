@@ -302,6 +302,7 @@ class App:
 			output += '\tSelf Neutral: ' + str(settings['selfnull']) + '\n'
 			output += '*/\n\n'
 			output += '#include "'+def_file+'"\n\n'
+			output += 'WeaponRelationships:\n'
 			#print relations
 			weapons = self.widgets['wpool'].get(0,tk.END)
 			for w1 in settings['weaponlist']:
