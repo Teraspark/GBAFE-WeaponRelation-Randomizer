@@ -235,21 +235,24 @@ class App:
 		remove selected weapon type from pool
 		'''
 		z = self.widgets['wpool'].curselection()
-		if z: self.widgets['wpool'].delete(z)
-		z = len(self.widgets['wpool'].get(0,tk.END))
-		self.widgets['minreldata']['to']=z
-		self.widgets['maxreldata']['to']=z
-		self.adjustmax()
+		if z:
+			self.widgets['wpool'].delete(z)
+			z = len(self.widgets['wpool'].get(0,tk.END))
+			self.widgets['minreldata']['to']=z
+			self.widgets['maxreldata']['to']=z
+			self.adjustmax()
 		
 	def winsert(self):
 		'''
 		add weapon type to pool
 		'''
 		z = self.values['pooladd'].get()
-		if z: self.widgets['wpool'].insert(tk.END,z)
-		z = len(self.widgets['wpool'].get(0,tk.END))
-		self.widgets['minreldata']['to']=z
-		self.widgets['maxreldata']['to']=z
+		z = z.strip()
+		if z: 
+			self.widgets['wpool'].insert(tk.END,z)
+			z = len(self.widgets['wpool'].get(0,tk.END))
+			self.widgets['minreldata']['to']=z
+			self.widgets['maxreldata']['to']=z
 		
 	def newseed(self):
 		nseed = ''.join(random.choice(Numberlist+Letterlist) for _ in range(10))
