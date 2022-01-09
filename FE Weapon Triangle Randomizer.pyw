@@ -174,8 +174,8 @@ class App:
 		self.values['maxhit'].set(15)
 		self.values['minatk'].set(1)
 		self.values['maxatk'].set(1)
-		self.values['minrel'].set(1)
-		self.values['maxrel'].set(1)
+		self.values['minrel'].set(2)
+		self.values['maxrel'].set(2)
 		
 		#randomizer mode selection
 		self.frames['modebox'] = modebox
@@ -210,6 +210,9 @@ class App:
 		
 	def adjustmin(self):
 		'''ensure the min values never rise above the max values'''
+		z = self.widgets['minreldata']['to']
+		if self.values['minrel'].get() > z:
+			self.values['minrel'].set(z)
 		if self.values['minhit'].get() > self.values['maxhit'].get():
 			self.values['maxhit'].set(self.values['minhit'].get())
 		if self.values['minatk'].get() > self.values['maxatk'].get():
@@ -218,6 +221,9 @@ class App:
 			self.values['maxrel'].set(self.values['minrel'].get())
 	def adjustmax(self):
 		'''ensure the max values never fall below the min values'''
+		z = self.widgets['maxreldata']['to']
+		if self.values['maxrel'].get() > z:
+			self.values['maxrel'].set(z)
 		if self.values['maxhit'].get() < self.values['minhit'].get():
 			self.values['minhit'].set(self.values['maxhit'].get())
 		if self.values['maxatk'].get() < self.values['minatk'].get():
@@ -230,6 +236,10 @@ class App:
 		'''
 		z = self.widgets['wpool'].curselection()
 		if z: self.widgets['wpool'].delete(z)
+		z = len(self.widgets['wpool'].get(0,tk.END))
+		self.widgets['minreldata']['to']=z
+		self.widgets['maxreldata']['to']=z
+		self.adjustmax()
 		
 	def winsert(self):
 		'''
@@ -237,6 +247,9 @@ class App:
 		'''
 		z = self.values['pooladd'].get()
 		if z: self.widgets['wpool'].insert(tk.END,z)
+		z = len(self.widgets['wpool'].get(0,tk.END))
+		self.widgets['minreldata']['to']=z
+		self.widgets['maxreldata']['to']=z
 		
 	def newseed(self):
 		nseed = ''.join(random.choice(Numberlist+Letterlist) for _ in range(10))
