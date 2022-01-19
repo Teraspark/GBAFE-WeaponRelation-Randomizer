@@ -14,6 +14,7 @@ from tkinter.filedialog import asksaveasfilename
 from tkinter import messagebox
 from string import ascii_letters as Letterlist
 from string import digits as Numberlist
+import tags
 
 GUI = True #command line version not implemented yet
 def_file = "WeaponRelationDefs.event"
@@ -292,18 +293,20 @@ class App:
 			# random.seed(self.values['seed'].get())
 		
 		
+		if not self.values['outfile'].get():
+			self.loadfile()
 		m = self.values['randomode'].get()
 		if m in range(len(self.modes)):
 			self.modes[m][1](wrlist,settings)
+			self.writetable(wrlist,settings,m)
 			self.writefile(wrlist,settings,m)
 		return
 	
 	def writefile(self,relations,settings,mode):
+		'''create the output randomizer event file'''
 		def printMacro(rw1,rw2,wr):
 			return 'WeaponRelation('+rw1+','+rw2+\
 			','+str(wr['hit'])+','+str(wr['atk'])+')'
-		if not self.values['outfile'].get():
-			self.loadfile()
 		if self.values['outfile'].get():
 			#write seed and settings to file
 			output = '/* '
@@ -321,7 +324,6 @@ class App:
 			output += '#include "'+def_file+'"\n\n'
 			output += 'WeaponRelationships:\n'
 			#print relations
-			weapons = self.widgets['wpool'].get(0,tk.END)
 			for w1 in settings['weaponlist']:
 				output += '//' +w1 + ' Relations\n'
 				for w2 in settings['weaponlist']:
@@ -336,7 +338,98 @@ class App:
 			Path(self.values['outfile'].get()).write_text(output)
 			genDefs(Path(self.values['outfile'].get()))
 			prompt = messagebox.showinfo(title='Randomizing Complete!',message='Randomzing Complete!')
+		return
+	
+	def writetable(self,relations,settings,mode):
+		'''generate html relations table'''
+		def print_value(wrv):
+			# tcol = tags.Tag('td')
+			# trow.add_content(tcol)
+			sp = tags.Tag('span')
+			# tcol.add_content(s1)
+			# tcol.add_content(tags.BR)
+			# s2 = tags.Tag('span')
+			# tcol.add_content(s2)
+			if wrv < 0:
+				sp.add_content(str(wrv))
+				sp.set_tag_attr('class','minus')
+			elif wrv > 0:
+				sp.add_content('+'+str(wrv))
+				sp.set_tag_attr('class','plus')
+			# if wr['hit'] < 0:
+				# s1.add_content(str(wr['hit']))
+				# s1.set_tag_attr('class','minus')
+			# else:
+				# s1.add_content('+'+str(wr['hit']))
+				# s1.set_tag_attr('class','plus')
+			# if wr['atk'] < 0:
+				# s2.add_content(str(wr['atk']))
+				# s2.set_tag_attr('class','minus')
+			# else:
+				# s2.add_content('+'+str(wr['atk']))
+				# s2.set_tag_attr('class','plus')
+			return sp
+		#create new html page
+		if not self.values['outfile'].get():
+			#do nothing if no output file path
 			return
+		output = tags.HTML()
+		z = tags.Tag('title')
+		z.add_content('Weapon Relations Randomizer')
+		output.head.add_content(z)
+		#set up the style information
+		style = tags.Style()
+		output.head.add_content(style)
+		style.add_tag('table, th, td')
+		style.edit_tag('table, th, td','border','1px solid black')
+		style.add_class('plus')
+		style.add_class('minus')
+		style.edit_class('minus','color','red')
+		style.edit_class('plus','color','blue')
+		#generate body
+		z = tags.Tag('h1')
+		z.add_content('Weapon Relations Randomizer')
+		output.body.add_content(z)
+		#output settings
+		
+		#generate table
+		table = tags.Tag('table')
+		output.body.add_content(table)
+		#generate table
+		#header row
+		row = tags.Tag('tr')
+		table.add_content(row)
+		col = tags.Tag('th')
+		row.add_content(col)
+		col.add_content('Weapons')
+		for w in settings['weaponlist']:
+			col = tags.Tag('th')
+			row.add_content(col)
+			col.add_content(w)
+		for w1 in settings['weaponlist']:
+			# new row
+			row = tags.Tag('tr')
+			table.add_content(row)
+			#first column is weapon type
+			col = tags.Tag('th')
+			row.add_content(col)
+			col.add_content(w1)
+			for w2 in settings['weaponlist']:
+				col = tags.Tag('td')
+				row.add_content(col)
+				r = relations.getRelation(w1,w2)
+				span = print_value(r['hit'])
+				col.add_content(span)
+				col.add_content(tags.BR)
+				span = print_value(r['atk'])
+				col.add_content(span)
+				
+		#write to file
+		z = Path(self.values['outfile'].get())
+		z = z.with_suffix('.html')
+		output = str(output)
+		z.write_text(output)
+		return
 
 class ToolTip(object):
 	'''create a tooltip for a given widget'''
