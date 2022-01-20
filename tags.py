@@ -4,7 +4,7 @@ check if i need to implement support for
 -	all the canvas stuff
 '''
 
-BR = '<br>' #line break
+BR = '<br/>' #line break
 
 class Tag:
 	'''attempt to create a system for html tags
