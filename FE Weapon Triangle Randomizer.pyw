@@ -807,16 +807,13 @@ def chaos_rando(relations,settings):
 	
 	for w1 in weapons:
 		count = random.choice(rcnt)
-		c = 0
 		wlist = list(weapons)
 		if settings['selfnull']: wlist.remove(w1)
-		for w in wlist:
-			if not relations.isNeutral(w1,w):
-				wlist.remove(w)
-				c += 1
-			elif rc[w] >= max(rcnt):
-				wlist.remove(w)
-		while c < count and wlist:
+		w = list(wlist)
+		for w2 in w:
+			if not relations.isNeutral(w1,w2):
+				wlist.remove(w2)
+		while rc[w1] < count and wlist:
 			w2 = random.choice(wlist)
 			wlist.remove(w2)
 			neg = random.choice([1,-1])
@@ -825,8 +822,8 @@ def chaos_rando(relations,settings):
 			relations.setRelation(w1,w2,hit,atk)
 			if settings['symmetry'] and w1 != w2:
 				relations.setRelation(w2,w1,-hit,-atk)
-			c += 1
-		rc[w1] = c
+				rc[w2] += 1
+			rc[w1] += 1
 	return
 	
 def tri_rando(relations,settings):
