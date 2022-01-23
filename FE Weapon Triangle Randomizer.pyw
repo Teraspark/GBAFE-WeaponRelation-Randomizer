@@ -747,24 +747,18 @@ def genDefs(defpath):
 
 def circle_rando(relations,settings):
 	'''Circular Randomization'''
-	def build_circle(hit,atk):
-		weapons = list(settings['weaponlist'])
-		wc = [random.choice(weapons)]
-		weapons.remove(wc[-1])
-		while weapons:
-			wlist = list(weapons)
-			for w in wlist:
-				if not relations.isNeutral(wc[-1],w):
-					wlist.remove(w)
-			wc.append(random.choice(wlist))
-			weapons.remove(wc[-1])
-		# atk = random.choice(ratk)
-		# hit = random.choice(rhit)
-		for (n,w) in enumerate(wc):
-			relations.setRelation(wc[n-1],wc[n],hit,atk)
-			if settings['symmetry']:
-				relations.setRelation(wc[n],wc[n-1],-hit,-atk)
-		return
+	def build_circle(weapons,start,current,circle):
+		#loop through the items that current has no relation with yet
+		for item in [w for w in weapons if current!=w and relations.isNeutral(current,w)]:
+			#return circle if start is the last unused item in weapons
+			if item == start and len(circle) == len(weapons)-1: return circle + (item,)
+			#skip if item == start but not at end of circle
+			elif item == start: continue
+			#skip this item if already in circle
+			elif item in circle: continue
+			c = build_circle(weapons,start,item,circle+(item,))
+			if c: return c
+		return ()
 	
 	random.seed(settings['seed'])
 	rhit = settings['rhit']
@@ -778,14 +772,26 @@ def circle_rando(relations,settings):
 		random.seed(settings['seed'])
 	
 	circles = random.choice(rcnt)
-	for c in range(circles):
-		z = random.choice(rhit)
-		x = random.choice(ratk)
-		build_circle(z,x)
-		if not settings['symmetry']:
-			z = random.choice(rhit)
-			x = random.choice(ratk)
-			build_circle(-z,-x)
+	weapons = list(settings['weaponlist'])
+	random.shuffle(weapons)
+	while circles > 0:
+		w = random.choice(weapons)
+		wc = build_circle(weapons,w,w,())
+		neg = random.choice([-1,1])
+		z = random.choice(rhit) * neg
+		x = random.choice(ratk) * neg
+		#exit loop early if no more circles found
+		if not wc: break 
+		#set the relations for the circle
+		for (w,q) in enumerate(wc):
+			relations.setRelation(wc[w-1],wc[w],z,x)
+			#set opposite relation if symmetry is on
+			if settings['symmetry']:
+				relations.setRelation(wc[w],wc[w-1],-z,-x)
+		if settings['symmetry']:
+			circles -= 2
+		else:
+			circles -= 1
 	return
 	
 def chaos_rando(relations,settings):
