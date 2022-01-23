@@ -74,8 +74,8 @@ class App:
 		
 		
 		topbox = ttk.Frame(self.mainframe)
-		topbox.grid(row=1,column=0,rowspan=2,columnspan=3)
-		self.frames['topbox'] =  topbox
+		topbox.grid(row=1,column=0,rowspan=2,columnspan=3,pady=5)
+		self.frames['topbox'] = topbox
 		
 		#setup seed ui
 		self.values['seed'] = tk.StringVar()
@@ -85,7 +85,6 @@ class App:
 		seedentry.grid(row=0,column=2,columnspan=2,sticky=tk.E+tk.W)
 		seedchange = ttk.Button(topbox,text='New Seed',command=self.newseed)
 		seedchange.grid(row=0,column=4,sticky=tk.W,padx=2,pady=2)
-		
 		CreateToolTip(seedchange,'Generate a new seed')
 		
 		#setup output file selection ui
@@ -95,7 +94,12 @@ class App:
 		outentry = ttk.Entry(topbox,textvariable=self.values['outfile'])
 		outentry.grid(row=1,column=2,columnspan=2,sticky=tk.E+tk.W)
 		outfind = ttk.Button(topbox,text=' Browse...',command=self.loadfile)
-		outfind.grid(row=1,column=4,sticky=tk.W,padx=2,pady=3)
+		outfind.grid(row=1,column=4,sticky=tk.W,padx=2)
+		
+		self.values['chart'] = tk.IntVar(value=1)
+		relchart = ttk.Checkbutton(topbox,variable=self.values['chart'],text='Spoilers Chart')
+		relchart.grid(row=2,column=2,columnspan=2)
+		CreateToolTip(relchart,'Generate a chart for weapon relations')
 		
 		statbox = ttk.Frame(self.mainframe)
 		poolbox = ttk.Frame(self.mainframe)
@@ -298,7 +302,8 @@ class App:
 		m = self.values['randomode'].get()
 		if m in range(len(self.modes)):
 			self.modes[m][1](wrlist,settings)
-			self.writetable(wrlist,settings,m)
+			if self.values['chart'].get(): 
+				self.writetable(wrlist,settings,m)
 			self.writefile(wrlist,settings,m)
 		return
 	
