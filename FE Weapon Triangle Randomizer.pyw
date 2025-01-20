@@ -204,7 +204,7 @@ class App:
 		self.values['selfnull'] = tk.IntVar(value=1)
 		selfneutral = ttk.Checkbutton(modeconfig,variable=self.values['selfnull'],text='Self Neutrality')
 		selfneutral.grid(row=2,sticky=tk.W)
-		CreateToolTip(selfneutral,'When checked, even weapon vs itself matchup will be neutral')
+		CreateToolTip(selfneutral,'When checked, every weapon vs itself matchup will be neutral')
 		
 		#button to start randomization
 		run = ttk.Button(self.mainframe,text='Randomize',command=self.randomize)
