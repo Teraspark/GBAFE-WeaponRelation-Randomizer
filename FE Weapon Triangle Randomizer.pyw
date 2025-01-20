@@ -20,7 +20,7 @@ GUI = True #command line version not implemented yet
 def_file = "WeaponRelationDefs.event"
 
 #defualt List of weapon types
-WeaponList = ('Sword','Lance','Axe','Bow','Light','Anima','Dark','Monster')
+WeaponList = ('Swords','Lances','Axes','Bows','Light','Anima','Dark','Monster')
 
 #File loading/saving functions
 def askForFileIn(filedata=()):
@@ -729,11 +729,11 @@ def genDefs(defpath):
 		
 		//Define Weapon Types here
 		//These are already defined in EAstlib
-		#define Sword 0x0
-		#define Lance 0x1
-		#define Axe 0x2
-		#define Bow 0x3
-		#define Staff 0x4
+		#define Swords 0x0
+		#define Lances 0x1
+		#define Axes 0x2
+		#define Bows 0x3
+		#define Staves 0x4
 		#define Anima 0x5
 		#define Light 0x6
 		#define Dark 0x7
